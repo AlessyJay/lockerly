@@ -17,6 +17,7 @@ import {
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { createAccount } from "@/lib/actions/user.actions";
+import OTPModel from "./OTPModel";
 
 type FormType = "sign-in" | "sign-up";
 
@@ -32,7 +33,6 @@ const authFormSchema = (formType: FormType) => {
 
 const AuthForm = ({ type }: { type: FormType }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [accountId, setAccountId] = useState<string>("");
 
@@ -141,6 +141,10 @@ const AuthForm = ({ type }: { type: FormType }) => {
       </Form>
 
       {/* OTP Verification */}
+
+      {accountId && (
+        <OTPModel email={form.getValues("email")} accountId={accountId} />
+      )}
     </React.Fragment>
   );
 };
