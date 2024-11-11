@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# <img src="./public/images/icon1_trans.png" alt="Lockerly Logo" width="120"> Lockerly
 
-## Getting Started
+Lockerly is a powerful and intuitive web application designed to securely store and manage your files. Whether you're collaborating with a team or managing personal files, Lockerly simplifies the process of storing, sharing, and organizing your data. With features like file uploads, version control, and access control, Lockerly ensures that your files are safe, accessible, and organized, wherever you are.
 
-First, run the development server:
+---
+
+## 🚀 Features
+
+- **Secure File Storage**: Safely upload, store, and download your files with complete peace of mind.
+- **Version Control**: Keep track of file revisions and revert to previous versions as needed.
+- **Collaboration Tools**: Share files with others and collaborate seamlessly.
+- **Access Control**: Manage permissions and control who can access, edit, or share your files.
+- **Real-time Analytics**: Track file usage and collaboration stats using dynamic charts.
+
+---
+
+## 🛠️ Tech Stack
+
+Lockerly is built with modern web technologies to ensure high performance, security, and scalability.
+
+<div align="center">
+  
+<a href="https://nextjs.org" target="_blank"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"></a>
+<a href="https://appwrite.io" target="_blank"><img src="https://img.shields.io/badge/Appwrite-F02E65?style=for-the-badge&logo=appwrite&logoColor=white" alt="Appwrite"></a>
+<a href="https://ui.shadcn.com/" target="_blank"><img src="https://img.shields.io/badge/Shadcn-1A1A1A?style=for-the-badge&logo=shadcn&logoColor=white" alt="Shadcn"></a>
+<a href="https://www.chartjs.org" target="_blank"><img src="https://img.shields.io/badge/Chart.js-FFD700?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Chart.js"></a>
+
+</div>
+
+- **Next.js 15**: The latest version of Next.js provides a robust framework for server-side rendering, optimized performance, and efficient routing.
+- **Appwrite**: A self-hosted backend server that offers a comprehensive suite of APIs for authentication, file management, and database operations.
+- **Shadcn**: A design system for building elegant and accessible components, ensuring a sleek and intuitive UI.
+- **Chart.js**: A powerful charting library used to visualize file usage statistics and analytics in real-time.
+
+---
+
+## 💻 Getting Started
+
+### Prerequisites
+
+Make sure you have **Node.js** and **Yarn** installed on your system.
 
 ```bash
-npm run dev
-# or
+# Clone the repository
+git clone https://github.com/your-username/lockerly.git
+
+# Navigate to the project directory
+cd lockerly
+
+# Install dependencies
+yarn install
+
+# Run the application
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Lockerly will be available at http://localhost:3000.

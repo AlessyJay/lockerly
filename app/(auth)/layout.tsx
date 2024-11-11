@@ -1,29 +1,18 @@
 import Image from "next/image";
 import React from "react";
-import { Anton_SC } from "next/font/google";
-
-const jost = Anton_SC({
-  subsets: ["latin"],
-  weight: ["400"],
-});
 
 const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (
     <div className="flex min-h-screen">
       <section className="hidden w-1/2 items-center justify-center bg-brand p-10 lg:flex xl:w-2/5">
         <div className="flex max-h-[800px] max-w-[430px] flex-col justify-center space-y-12">
-          <div className="flex items-center">
-            <Image
-              src="/images/icon1_trans.png"
-              alt="icon"
-              width={224}
-              height={82}
-              className="h-auto"
-            />
-            <h1 className={`${jost.className} text-6xl text-white`}>
-              Lockerly
-            </h1>
-          </div>
+          <Image
+            src="/images/icon1_trans.png"
+            alt="icon"
+            width={224}
+            height={82}
+            className="h-auto"
+          />
 
           <div className="space-y-5 text-white">
             <h1 className="h1">Manage your files the best way</h1>
