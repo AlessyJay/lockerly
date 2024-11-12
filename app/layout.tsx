@@ -16,9 +16,6 @@ export const metadata: Metadata = {
   },
   description:
     "Lockerly - A website that allows users to store and manage their files in a secure and organized manner. It provides a range of features, including file upload and download, version control, collaboration tools, and access control. Lockerly aims to simplify the process of storing and sharing files, making it easy to access and manage files from anywhere.",
-  icons: {
-    icon: "/images/icon1_trans.png",
-  },
 };
 
 export default function RootLayout({

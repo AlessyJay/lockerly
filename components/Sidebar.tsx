@@ -59,14 +59,6 @@ const Sidebar = ({
         </ul>
       </nav>
 
-      <Image
-        src="/images/icon_trans.png"
-        alt="file container"
-        width={506}
-        height={418}
-        className="w-full transition-all hover:rotate-2 hover:scale-105 hover:drop-shadow-xl"
-      />
-
       <div className="sidebar-user-info">
         <Avatar>
           <AvatarImage src={avatar} />
