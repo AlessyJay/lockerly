@@ -16,7 +16,7 @@ import {
 } from "./ui/form";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { createAccount } from "@/lib/actions/user.actions";
+import { createAccount, SignInUser } from "@/lib/actions/user.actions";
 import OTPModel from "./OTPModel";
 
 type FormType = "sign-in" | "sign-up";
@@ -50,10 +50,13 @@ const AuthForm = ({ type }: { type: FormType }) => {
     setIsLoading(true);
 
     try {
-      const user = await createAccount({
-        fullName: values.fullName || "",
-        email: values.email,
-      });
+      const user =
+        type === "sign-up"
+          ? await createAccount({
+              fullName: values.fullName || "",
+              email: values.email,
+            })
+          : await SignInUser({ email: values.email });
 
       setAccountId(user.accountId);
     } catch (error) {

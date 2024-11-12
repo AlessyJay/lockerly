@@ -18,6 +18,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import FileUploader from "./FileUploader";
+import { SignOutUser } from "@/lib/actions/user.actions";
 
 const MobileNav = ({
   fullName,
@@ -88,7 +89,7 @@ const MobileNav = ({
               <FileUploader />
               <Button
                 type="submit"
-                onClick={() => {}}
+                onClick={async () => await SignOutUser}
                 className="mobile-sign-out-button"
               >
                 <LogOut className="w-6" />
