@@ -19,12 +19,11 @@ Lockerly is a powerful and intuitive web application designed to securely store 
 Lockerly is built with modern web technologies to ensure high performance, security, and scalability.
 
 <div align="center">
-  
 <a href="https://nextjs.org" target="_blank"><img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js"></a>
+<a href="https://tailwindcss.com" target="_blank"><img src="https://img.shields.io/badge/-Tailwind_CSS-black?style=for-the-badge&logoColor=white&logo=tailwindcss&color=06B6D4" alt="tailwindcss" /></a>
+<a href="https://www.typescriptlang.org" target="_blank"><img src="https://img.shields.io/badge/-TypeScript-black?style=for-the-badge&logoColor=white&logo=typescript&color=3178C6" alt="typescript" /></a>
 <a href="https://appwrite.io" target="_blank"><img src="https://img.shields.io/badge/Appwrite-F02E65?style=for-the-badge&logo=appwrite&logoColor=white" alt="Appwrite"></a>
 <a href="https://ui.shadcn.com/" target="_blank"><img src="https://img.shields.io/badge/Shadcn-1A1A1A?style=for-the-badge&logo=shadcn&logoColor=white" alt="Shadcn"></a>
-<a href="https://www.chartjs.org" target="_blank"><img src="https://img.shields.io/badge/Chart.js-FFD700?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Chart.js"></a>
-
 </div>
 
 - **Next.js 15**: The latest version of Next.js provides a robust framework for server-side rendering, optimized performance, and efficient routing.
@@ -48,10 +47,10 @@ git clone https://github.com/your-username/lockerly.git
 cd lockerly
 
 # Install dependencies
-yarn install
+yarn install or npm i
 
 # Run the application
-yarn dev
+yarn dev or npm run dev
 ```
 
 Lockerly will be available at http://localhost:3000.
