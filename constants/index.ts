@@ -19,7 +19,7 @@ export const navItems = [
   { name: "Others", icon: CircleEllipsis, url: "/others" },
 ];
 
-export const actionsDropdownItems = [
+export const actionsDropdownItems: ActionType[] = [
   {
     label: "Rename",
     icon: Edit,

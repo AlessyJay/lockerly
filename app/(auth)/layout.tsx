@@ -11,7 +11,8 @@ const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
             alt="icon"
             width={224}
             height={82}
-            className="h-auto"
+            className="size-auto"
+            priority
           />
 
           <div className="space-y-5 text-white">
@@ -26,7 +27,8 @@ const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
             alt="files"
             width={342}
             height={342}
-            className="transition-all hover:rotate-2 hover:scale-105 hover:drop-shadow-xl"
+            className="size-auto transition-all hover:rotate-2 hover:scale-105 hover:drop-shadow-xl"
+            priority
           />
         </div>
       </section>
@@ -38,7 +40,8 @@ const layout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
             alt="icon"
             width={224}
             height={82}
-            className="h-auto w-[200px] lg:w-[250px]"
+            className="size-auto h-auto w-[200px] lg:w-[250px]"
+            priority
           />
         </div>
         {children}

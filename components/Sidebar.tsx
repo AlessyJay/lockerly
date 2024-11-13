@@ -27,7 +27,8 @@ const Sidebar = ({
           alt="icon"
           width={160}
           height={50}
-          className="hidden h-auto lg:block"
+          className="hidden size-auto lg:block"
+          priority
         />
 
         <Image
@@ -35,7 +36,8 @@ const Sidebar = ({
           alt="logo"
           width={52}
           height={52}
-          className="lg:hidden"
+          className="size-auto lg:hidden"
+          priority
         />
       </Link>
 

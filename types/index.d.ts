@@ -4,7 +4,9 @@ declare type FileType = "document" | "image" | "video" | "audio" | "other";
 
 declare interface ActionType {
   label: string;
-  icon: string;
+  icon: ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
+  >;
   value: string;
 }
 
