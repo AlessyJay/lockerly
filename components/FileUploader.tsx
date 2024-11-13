@@ -17,7 +17,7 @@ export default function FileUploader({
   ownerId,
   accountId,
 }: {
-  className: string;
+  className?: string;
   ownerId: string;
   accountId: string;
 }) {

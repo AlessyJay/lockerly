@@ -24,10 +24,14 @@ const MobileNav = ({
   fullName,
   email,
   avatar,
+  accountId,
+  userId,
 }: {
   fullName: string;
   email: string;
   avatar: string;
+  accountId: string;
+  userId: string;
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const pathname = usePathname();
@@ -86,7 +90,7 @@ const MobileNav = ({
             <Separator className="my-5 bg-light-200/20" />
 
             <div className="flex flex-col justify-between gap-5 pb-5">
-              <FileUploader />
+              <FileUploader accountId={accountId} ownerId={userId} />
               <Button
                 type="submit"
                 onClick={async () => await SignOutUser}
