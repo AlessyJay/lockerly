@@ -24,6 +24,8 @@ import Link from "next/link";
 import { constructDownloadUrl } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { renameFile } from "@/lib/actions/file.actions";
+import { usePathname } from "next/navigation";
 
 const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -34,6 +36,8 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const pathname = usePathname();
+
   const closeAllModel = () => {
     setIsOpen(false);
     setIsDropdownOpen(false);
@@ -41,7 +45,39 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     setName(file.name);
   };
 
-  const handleAction = () => {};
+  /**
+   * Handles the action when a user selects an item from the action dropdown.
+   *
+   *
+   * This function is called when the user selects an item from the action dropdown.
+   * It will call the corresponding action function and then close the model.
+   * If the action is successful, it will also revalidate the current page.
+   */
+  const handleAction = async () => {
+    if (!action) return;
+
+    setIsLoading(true);
+    let success = false;
+
+    const actions = {
+      rename: () =>
+        renameFile({
+          fileId: file.$id,
+          name,
+          extension: file.extension,
+          path: pathname,
+        }),
+
+      share: () => console.log("share"),
+      delete: () => console.log("delete"),
+    };
+
+    success = await actions[action.value as keyof typeof actions]();
+
+    if (success) closeAllModel();
+
+    setIsLoading(false);
+  };
 
   const renderDialogContent = () => {
     if (!action) return null;

@@ -14,6 +14,11 @@ const handleError = (error: unknown, message: string) => {
   throw error;
 };
 
+/**
+ * Upload a file to the given path.
+ * @param {UploadFileProps} props - The file to upload, the owner's ID, the account ID, and the path to revalidate.
+ * @returns {Promise<Models.Document>} The uploaded file's document.
+ */
 export const uploadFile = async ({
   file,
   ownerId,
@@ -67,6 +72,12 @@ export const uploadFile = async ({
   }
 };
 
+/**
+ * Create the queries to list the files accessible to the current user.
+ * @param {Models.Document} currentUser - The current user document.
+ * @returns {Promise<Query[]>} A promise that resolves to an array of queries.
+ * @throws Will throw an error if any of the queries fail.
+ */
 export const createQueries = async (currentUser: Models.Document) => {
   const queries = [
     Query.or([
@@ -80,6 +91,11 @@ export const createQueries = async (currentUser: Models.Document) => {
   return queries;
 };
 
+/**
+ * Retrieve a list of files accessible to the current user.
+ * @returns {Promise<Models.Document[]>} A promise that resolves to an array of file documents.
+ * @throws Will throw an error if the user is not found or if retrieval fails.
+ */
 export const getFiles = async () => {
   const { databases } = await createAdminClient();
 
@@ -99,5 +115,36 @@ export const getFiles = async () => {
     return parseStringify(files);
   } catch (error) {
     handleError(error, "Failed to get the files!");
+  }
+};
+
+/**
+ * Rename a file
+ * @param {RenameFileProps} props - The id of the file to rename, the new name and extension, and the path to revalidate
+ * @returns {Promise<Models.Document>} The updated file
+ */
+export const renameFile = async ({
+  fileId,
+  name,
+  extension,
+  path,
+}: RenameFileProps) => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const newName = `${name}.${extension}`;
+
+    const updatedFile = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollection,
+      fileId,
+      { name: newName },
+    );
+
+    revalidatePath(path);
+
+    return parseStringify(updatedFile);
+  } catch (error) {
+    handleError(error, "Failed to rename the file!");
   }
 };
