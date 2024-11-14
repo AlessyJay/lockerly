@@ -118,11 +118,6 @@ export const getFiles = async () => {
   }
 };
 
-/**
- * Rename a file
- * @param {RenameFileProps} props - The id of the file to rename, the new name and extension, and the path to revalidate
- * @returns {Promise<Models.Document>} The updated file
- */
 export const renameFile = async ({
   fileId,
   name,
@@ -139,6 +134,29 @@ export const renameFile = async ({
       appwriteConfig.filesCollection,
       fileId,
       { name: newName },
+    );
+
+    revalidatePath(path);
+
+    return parseStringify(updatedFile);
+  } catch (error) {
+    handleError(error, "Failed to rename the file!");
+  }
+};
+
+export const updateFileUsers = async ({
+  fileId,
+  emails,
+  path,
+}: UpdateFileUsersProps) => {
+  const { databases } = await createAdminClient();
+
+  try {
+    const updatedFile = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollection,
+      fileId,
+      { users: emails },
     );
 
     revalidatePath(path);

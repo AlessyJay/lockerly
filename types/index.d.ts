@@ -10,6 +10,13 @@ declare interface ActionType {
   value: string;
 }
 
+declare interface ShareProps {
+  file: Models.Document;
+  onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
+  onRemove: (email: string) => void;
+  isLoading?: boolean;
+}
+
 declare interface SearchParamProps {
   params?: Promise<SegmentParams>;
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;

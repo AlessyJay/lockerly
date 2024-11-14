@@ -24,8 +24,9 @@ import Link from "next/link";
 import { constructDownloadUrl } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { renameFile } from "@/lib/actions/file.actions";
+import { renameFile, updateFileUsers } from "@/lib/actions/file.actions";
 import { usePathname } from "next/navigation";
+import { FileDetails, ShareInput } from "./ActionsModalContent";
 
 const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -35,6 +36,8 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [name, setName] = useState<string>(file.name);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [emails, setEmails] = useState<string[]>([]);
+  const [isRemovingUser, setIsRemovingUser] = useState<boolean>(false);
 
   const pathname = usePathname();
 
@@ -68,7 +71,13 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
           path: pathname,
         }),
 
-      share: () => console.log("share"),
+      share: () =>
+        updateFileUsers({
+          fileId: file.$id,
+          emails,
+          path: pathname,
+        }),
+
       delete: () => console.log("delete"),
     };
 
@@ -77,6 +86,23 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     if (success) closeAllModel();
 
     setIsLoading(false);
+  };
+
+  const handleRemoveUser = async (email: string) => {
+    setIsRemovingUser(true);
+
+    const updatedEmails = emails.filter((e) => e !== email);
+
+    const success = await updateFileUsers({
+      fileId: file.$id,
+      emails: updatedEmails,
+      path: pathname,
+    });
+
+    if (success) setEmails(updatedEmails);
+
+    closeAllModel();
+    setIsRemovingUser(false);
   };
 
   const renderDialogContent = () => {
@@ -94,6 +120,16 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+            />
+          )}
+
+          {value === "details" && <FileDetails file={file} />}
+          {value === "share" && (
+            <ShareInput
+              file={file}
+              onInputChange={setEmails}
+              onRemove={handleRemoveUser}
+              isLoading={isRemovingUser}
             />
           )}
           <DialogDescription />
