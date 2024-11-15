@@ -6,7 +6,6 @@ import { Button } from "./ui/button";
 import { cn, convertFileToUrl, getFileType } from "@/lib/utils";
 import { File, Upload, X } from "lucide-react";
 import Thumbnail from "./Thumbnail";
-import { Progress } from "@/components/ui/progress";
 import { MAX_FILE_SIZE } from "@/constants";
 import { useToast } from "@/hooks/use-toast";
 import { uploadFile } from "@/lib/actions/file.actions";
@@ -104,8 +103,6 @@ export default function FileUploader({
 
                   <div className="preview-item-name">
                     <p>{file.name}</p>
-
-                    <Progress value={33} />
                   </div>
                 </div>
                 <X
