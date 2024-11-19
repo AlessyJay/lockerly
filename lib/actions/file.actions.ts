@@ -1,6 +1,6 @@
 "use server";
 
-import { createAdminClient } from "../appwrite";
+import { createAdminClient, createSessionClient } from "../appwrite";
 import { ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import { appwriteConfig } from "../appwrite/config";
@@ -78,13 +78,35 @@ export const uploadFile = async ({
  * @returns {Promise<Query[]>} A promise that resolves to an array of queries.
  * @throws Will throw an error if any of the queries fail.
  */
-export const createQueries = async (currentUser: Models.Document) => {
+export const createQueries = async (
+  currentUser: Models.Document,
+  types: string[],
+  searchText?: string,
+  sort?: string,
+  limit?: number,
+) => {
   const queries = [
     Query.or([
       Query.equal("owner", [currentUser.$id]),
       Query.contains("users", [currentUser.email]),
     ]),
   ];
+
+  // This line will make the files type appear in the specific page.
+  if (types.length > 0) queries.push(Query.equal("type", types));
+
+  // This line will make the user be able to search for a specific file.
+  if (searchText) queries.push(Query.search("name", searchText));
+
+  // This line will make the user be able to limit the number of files.
+  if (limit) queries.push(Query.limit(limit));
+
+  // This line will make the user be able to sort the files.
+  const [sortBy, orderBy] = sort?.split("-") ?? [];
+
+  queries.push(
+    orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy),
+  );
 
   // Todo: Search, sort, limits
 
@@ -96,7 +118,12 @@ export const createQueries = async (currentUser: Models.Document) => {
  * @returns {Promise<Models.Document[]>} A promise that resolves to an array of file documents.
  * @throws Will throw an error if the user is not found or if retrieval fails.
  */
-export const getFiles = async () => {
+export const getFiles = async ({
+  types = [],
+  searchText = "",
+  sort = "$createdAt-desc",
+  limit,
+}: GetFilesProps) => {
   const { databases } = await createAdminClient();
 
   try {
@@ -104,7 +131,7 @@ export const getFiles = async () => {
 
     if (!currentUser) throw new Error("User not found!");
 
-    const queries = createQueries(currentUser);
+    const queries = createQueries(currentUser, types, searchText, sort, limit);
 
     const files = await databases.listDocuments(
       appwriteConfig.databaseId,
@@ -198,3 +225,44 @@ export const deleteFile = async ({
     return null;
   }
 };
+
+export async function getTotalSpaceUsed() {
+  try {
+    const { databases } = await createSessionClient();
+    const currentUser = await getCurrentUser();
+    if (!currentUser) throw new Error("User is not authenticated.");
+
+    const files = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollection,
+      [Query.equal("owner", [currentUser.$id])],
+    );
+
+    const totalSpace = {
+      image: { size: 0, latestDate: "" },
+      document: { size: 0, latestDate: "" },
+      video: { size: 0, latestDate: "" },
+      audio: { size: 0, latestDate: "" },
+      other: { size: 0, latestDate: "" },
+      used: 0,
+      all: 2 * 1024 * 1024 * 1024 /* 2GB available bucket storage */,
+    };
+
+    files.documents.forEach((file) => {
+      const fileType = file.type as FileType;
+      totalSpace[fileType].size += file.size;
+      totalSpace.used += file.size;
+
+      if (
+        !totalSpace[fileType].latestDate ||
+        new Date(file.$updatedAt) > new Date(totalSpace[fileType].latestDate)
+      ) {
+        totalSpace[fileType].latestDate = file.$updatedAt;
+      }
+    });
+
+    return parseStringify(totalSpace);
+  } catch (error) {
+    handleError(error, "Error calculating total space used:, ");
+  }
+}
