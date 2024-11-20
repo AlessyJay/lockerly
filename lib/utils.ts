@@ -212,14 +212,14 @@ export const getUsageSummary = (totalSpace: TotalSpace) => {
       title: "Documents",
       size: totalSpace.document.size,
       latestDate: totalSpace.document.latestDate,
-      icon: "/assets/icons/file-document-light.svg",
+      icon: "/icons/file-document-light.svg",
       url: "/documents",
     },
     {
       title: "Images",
       size: totalSpace.image.size,
       latestDate: totalSpace.image.latestDate,
-      icon: "/assets/icons/file-image-light.svg",
+      icon: "/icons/file-image-light.svg",
       url: "/images",
     },
     {
@@ -230,14 +230,14 @@ export const getUsageSummary = (totalSpace: TotalSpace) => {
         (totalSpace.audio.latestDate ?? "")
           ? totalSpace.video.latestDate
           : totalSpace.audio.latestDate,
-      icon: "/assets/icons/file-video-light.svg",
+      icon: "/icons/file-video-light.svg",
       url: "/media",
     },
     {
       title: "Others",
       size: totalSpace.other.size,
       latestDate: totalSpace.other.latestDate,
-      icon: "/assets/icons/file-other-light.svg",
+      icon: "/icons/file-other-light.svg",
       url: "/others",
     },
   ];
