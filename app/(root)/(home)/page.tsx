@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { getFiles, getTotalSpaceUsed } from "@/lib/actions/file.actions";
 import { convertFileSize, getUsageSummary } from "@/lib/utils";
 import Thumbnail from "@/components/Thumbnail";
+import FilePreview from "@/components/FilePreview";
 
 const Dashboard = async () => {
   // Parallel requests
@@ -50,7 +51,7 @@ const Dashboard = async () => {
                 <h5 className="summary-type-title">{summary.title}</h5>
                 <Separator className="bg-light-400" />
                 <FormattedDateTime
-                  date={summary.latestDate || Date.now().toString()}
+                  date={summary.latestDate || ""}
                   className="text-center"
                 />
               </div>
@@ -64,13 +65,9 @@ const Dashboard = async () => {
         <h2 className="h3 xl:h2 text-light-100">Recent files uploaded</h2>
         {files.documents.length > 0 ? (
           <ul className="mt-5 flex flex-col gap-5">
-            {files.documents.map((file: Models.Document) => (
-              <Link
-                href={file.url}
-                target="_blank"
-                className="flex items-center gap-3"
-                key={file.$id}
-              >
+            {files.documents.map((file: Models.DefaultDocument) => (
+              <li className="relative flex items-center gap-3" key={file.$id}>
+                <FilePreview file={file} />
                 <Thumbnail
                   type={file.type}
                   extension={file.extension}
@@ -87,7 +84,7 @@ const Dashboard = async () => {
                   </div>
                   <ActionDropdown file={file} />
                 </div>
-              </Link>
+              </li>
             ))}
           </ul>
         ) : (

@@ -96,9 +96,12 @@ export const verifySecret = async ({
 };
 
 export const getCurrentUser = async () => {
-  const { databases, account } = await createSessionClient();
+  const { account } = await createSessionClient();
 
   const result = await account.get();
+
+  // Collections have no public permissions: the session only proves who this is.
+  const { databases } = await createAdminClient();
 
   const user = await databases.listDocuments(
     appwriteConfig.databaseId,

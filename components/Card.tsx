@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Models } from "node-appwrite";
 import React, { Suspense } from "react";
 import Thumbnail from "./Thumbnail";
@@ -6,15 +5,17 @@ import { convertFileSize } from "@/lib/utils";
 import FormattedDateTime from "./FormattedDateTime";
 import ActionDropdown from "./ActionDropdown";
 import LoadingCard from "./LoadingCard";
+import FilePreview from "./FilePreview";
 
 interface Props {
-  file: Models.Document;
+  file: Models.DefaultDocument;
 }
 
 const Card = ({ file }: Props) => {
   return (
     <Suspense fallback={<LoadingCard />}>
-      <Link href={file.url} target="_blank" className="file-card">
+      <div className="file-card relative">
+        <FilePreview file={file} className="rounded-[18px]" />
         <div className="flex justify-between">
           <Thumbnail
             type={file.type}
@@ -40,7 +41,7 @@ const Card = ({ file }: Props) => {
             By: {file.owner.fullName}
           </p>
         </div>
-      </Link>
+      </div>
     </Suspense>
   );
 };

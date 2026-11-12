@@ -77,4 +77,4 @@ export const sortTypes = [
 export const avatarPlaceholderUrl =
   "https://www.svgrepo.com/show/382097/female-avatar-girl-face-woman-user-9.svg";
 
-export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+export const MAX_FILE_SIZE = 50 * 1000 * 1000; // 50MB, same as the Appwrite bucket's limit

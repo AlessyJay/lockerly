@@ -17,12 +17,10 @@ const Sort = () => {
   const searchParams = useSearchParams();
 
   const handleSort = (value: string) => {
-    const currentQyery = searchParams.get("query") || "";
-    const updatedUrl = currentQyery
-      ? `${path}?query=${currentQyery}?sort=${value}`
-      : `${path}?sort=${value}`;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sort", value);
 
-    router.push(updatedUrl);
+    router.push(`${path}?${params}`);
   };
 
   return (

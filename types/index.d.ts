@@ -11,7 +11,7 @@ declare interface ActionType {
 }
 
 declare interface ShareProps {
-  file: Models.Document;
+  file: Models.DefaultDocument;
   onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
   onRemove: (email: string) => void;
   isLoading?: boolean;
@@ -23,9 +23,7 @@ declare interface SearchParamProps {
 }
 
 declare interface UploadFileProps {
-  file: File;
-  ownerId: string;
-  accountId: string;
+  bucketFileId: string;
   path: string;
 }
 declare interface GetFilesProps {
@@ -37,7 +35,6 @@ declare interface GetFilesProps {
 declare interface RenameFileProps {
   fileId: string;
   name: string;
-  extension: string;
   path: string;
 }
 declare interface UpdateFileUsersProps {
@@ -47,7 +44,6 @@ declare interface UpdateFileUsersProps {
 }
 declare interface DeleteFileProps {
   fileId: string;
-  bucketFileId: string;
   path: string;
 }
 
@@ -79,7 +75,7 @@ declare interface ThumbnailProps {
 }
 
 declare interface ShareInputProps {
-  file: Models.Document;
+  file: Models.DefaultDocument;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemove: (email: string) => void;
 }

@@ -32,11 +32,13 @@ const OTPModel = ({
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
       const sessionId = await verifySecret({ accountId, password });
@@ -44,6 +46,7 @@ const OTPModel = ({
       if (sessionId) router.push("/");
     } catch (error) {
       console.log("Failed to verify OTP", error);
+      setErrorMessage("Invalid or expired code. Please try again.");
     }
 
     setIsLoading(false);
@@ -77,6 +80,7 @@ const OTPModel = ({
             <InputOTPSlot index={5} className="shad-otp-slot" />
           </InputOTPGroup>
         </InputOTP>
+        {errorMessage && <p className="error-message">*{errorMessage}</p>}
         <AlertDialogFooter>
           <div className="flex w-full flex-col gap-4">
             <AlertDialogAction

@@ -22,10 +22,8 @@ const layout = async ({ children }: { children: React.ReactNode }) => {
           fullName={currentUser.fullName}
           email={currentUser.email}
           avatar={currentUser.avatar}
-          accountId={currentUser.accountId}
-          userId={currentUser.$id}
         />
-        <Header userId={currentUser.$id} accountId={currentUser.accountId} />
+        <Header />
 
         <div className="main-content">{children}</div>
       </section>

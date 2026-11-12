@@ -48,6 +48,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
       const user =
@@ -58,9 +59,19 @@ const AuthForm = ({ type }: { type: FormType }) => {
             })
           : await SignInUser({ email: values.email });
 
+      if (!user?.accountId) {
+        return setErrorMessage(
+          user?.error || "Something went wrong. Please try again.",
+        );
+      }
+
       setAccountId(user.accountId);
     } catch (error) {
-      setErrorMessage("Failed to create account. Please try again later.");
+      setErrorMessage(
+        type === "sign-up"
+          ? "Failed to create account. Please try again later."
+          : "Failed to sign in. Please try again later.",
+      );
       console.error(error);
     } finally {
       setIsLoading(false);

@@ -16,7 +16,11 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { calculatePercentage, convertFileSize } from "@/lib/utils";
+import {
+  calculateAngle,
+  calculatePercentage,
+  convertFileSize,
+} from "@/lib/utils";
 
 const chartConfig = {
   size: {
@@ -38,7 +42,7 @@ const Chart = ({ used = 0 }: { used: number }) => {
           <RadialBarChart
             data={chartData}
             startAngle={90}
-            endAngle={Number(calculatePercentage(used)) + 90}
+            endAngle={calculateAngle(used) + 90}
             innerRadius={80}
             outerRadius={110}
           >

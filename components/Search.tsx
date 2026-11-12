@@ -11,10 +11,10 @@ import FormattedDateTime from "./FormattedDateTime";
 import { useDebounce } from "use-debounce";
 
 const Search = () => {
-  const [query, setQuery] = useState<string>("");
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
-  const [result, setResult] = useState<Models.Document[]>([]);
+  const [query, setQuery] = useState<string>(searchQuery);
+  const [result, setResult] = useState<Models.DefaultDocument[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -22,17 +22,25 @@ const Search = () => {
 
   const [debounceQuery] = useDebounce(query, 1000);
 
+  // Runs only when the typed text settles. Re-running on URL changes reopened
+  // the dropdown after picking a result and stripped ?query= on page load.
   useEffect(() => {
     const fetchFile = async () => {
       if (debounceQuery.length === 0) {
         setResult([]);
         setOpen(false);
 
+        // Clear the page filter only if one is applied.
+        if (!searchQuery) return;
+
         const currentSort = searchParams.get("sort");
         const updateUrl = currentSort ? `${path}?sort=${currentSort}` : path;
 
         return router.push(updateUrl);
       }
+
+      // Already applied as the page filter (page load or a picked result).
+      if (debounceQuery === searchQuery) return;
 
       setLoading(true);
       setOpen(true);
@@ -49,7 +57,8 @@ const Search = () => {
     };
 
     fetchFile();
-  }, [debounceQuery, path, router, searchParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debounceQuery]);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -57,12 +66,12 @@ const Search = () => {
     }
   }, [searchQuery]);
 
-  const handleClick = (file: Models.Document) => {
+  const handleClick = (file: Models.DefaultDocument) => {
     setOpen(false);
     setResult([]);
 
     router.push(
-      `/${file.type === "video" || file.type === "audio" ? "media" : file.type + "s"}?query=${query}`,
+      `/${file.type === "video" || file.type === "audio" ? "media" : file.type + "s"}?query=${encodeURIComponent(query)}`,
     );
   };
 

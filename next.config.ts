@@ -2,16 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "100mb",
-    },
-  },
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "cloud.appwrite.io",
+        // Follows the Appwrite region in .env (e.g. sgp.cloud.appwrite.io).
+        hostname: new URL(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!).hostname,
         port: "",
         pathname: "/v1/storage/**",
       },

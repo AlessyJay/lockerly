@@ -16,10 +16,10 @@ const Page = async ({ searchParams, params }: SearchParamProps) => {
 
   const totalSizeInMB = (
     files.documents
-      .filter((file: Models.Document) =>
+      .filter((file: Models.DefaultDocument) =>
         types.includes(file.type.toLowerCase() as FileType),
       )
-      .reduce((total: number, file: Models.Document) => total + file.size, 0) /
+      .reduce((total: number, file: Models.DefaultDocument) => total + file.size, 0) /
     1_000_000
   ).toFixed(2);
 
@@ -43,7 +43,7 @@ const Page = async ({ searchParams, params }: SearchParamProps) => {
       {/* Render the files */}
       {files.total > 0 ? (
         <section className="file-list">
-          {files.documents.map((file: Models.Document) => {
+          {files.documents.map((file: Models.DefaultDocument) => {
             return <Card key={file.$id} file={file} />;
           })}
         </section>

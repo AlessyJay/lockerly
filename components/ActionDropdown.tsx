@@ -31,8 +31,9 @@ import {
 } from "@/lib/actions/file.actions";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "./ActionsModalContent";
+import { useToast } from "@/hooks/use-toast";
 
-const ActionDropdown = ({ file }: { file: Models.Document }) => {
+const ActionDropdown = ({ file }: { file: Models.DefaultDocument }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -44,12 +45,21 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isRemovingUser, setIsRemovingUser] = useState<boolean>(false);
 
   const pathname = usePathname();
+  const { toast } = useToast();
+
+  const showError = (message: string) =>
+    toast({
+      description: <p className="body-2 text-white">{message}</p>,
+      className: "error-toast",
+      variant: "destructive",
+    });
 
   const closeAllModel = () => {
     setIsOpen(false);
     setIsDropdownOpen(false);
     setAction(null);
     setName(file.name);
+    setEmails([]);
   };
 
   /**
@@ -64,54 +74,57 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     if (!action) return;
 
     setIsLoading(true);
-    let success = false;
 
     const actions = {
       rename: () =>
         renameFile({
           fileId: file.$id,
           name,
-          extension: file.extension,
           path: pathname,
         }),
 
+      // Add the typed emails to the people it's already shared with.
       share: () =>
         updateFileUsers({
           fileId: file.$id,
-          emails,
+          emails: [...file.users, ...emails],
           path: pathname,
         }),
 
       delete: () =>
         deleteFile({
           fileId: file.$id,
-          bucketFileId: file.bucketFileId,
           path: pathname,
         }),
     };
 
-    success = await actions[action.value as keyof typeof actions]();
+    try {
+      const success = await actions[action.value as keyof typeof actions]();
 
-    if (success) closeAllModel();
-
-    setIsLoading(false);
+      if (success) closeAllModel();
+    } catch {
+      showError(`Failed to ${action.value} ${file.name}. Please try again.`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRemoveUser = async (email: string) => {
     setIsRemovingUser(true);
 
-    const updatedEmails = emails.filter((e) => e !== email);
+    try {
+      await updateFileUsers({
+        fileId: file.$id,
+        emails: file.users.filter((e: string) => e !== email),
+        path: pathname,
+      });
 
-    const success = await updateFileUsers({
-      fileId: file.$id,
-      emails: updatedEmails,
-      path: pathname,
-    });
-
-    if (success) setEmails(updatedEmails);
-
-    closeAllModel();
-    setIsRemovingUser(false);
+      closeAllModel();
+    } catch {
+      showError(`Failed to remove ${email}. Please try again.`);
+    } finally {
+      setIsRemovingUser(false);
+    }
   };
 
   const renderDialogContent = () => {
@@ -176,7 +189,8 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-        <DropdownMenuTrigger className="shad-no-focus">
+        {/* relative: stays clickable above the FilePreview overlay in Card and the dashboard */}
+        <DropdownMenuTrigger className="shad-no-focus relative">
           <MoreVertical />
         </DropdownMenuTrigger>
         <DropdownMenuContent>

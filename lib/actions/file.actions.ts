@@ -1,40 +1,114 @@
 "use server";
 
-import { createAdminClient, createSessionClient } from "../appwrite";
-import { ID, Models, Query } from "node-appwrite";
-import { InputFile } from "node-appwrite/file";
+import { createAdminClient } from "../appwrite";
+import { Databases, ID, Models, Query } from "node-appwrite";
+import { z } from "zod";
 import { appwriteConfig } from "../appwrite/config";
 import { constructFileUrl, getFileType, parseStringify } from "../utils";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "./user.actions";
 
-const handleError = (error: unknown, message: string) => {
+// node-appwrite 17+ only returns relationships you select; the UI and getOwnedFile need owner.
+const ownerSelect = Query.select(["*", "owner.*"]);
+
+// A `never` function declaration, so callers' return types don't include `undefined` from the catch path.
+function handleError(error: unknown, message: string): never {
   console.log(error, message);
 
   throw error;
+}
+
+// Server actions are public endpoints, so every mutation re-checks the session and ownership here.
+const getOwnedFile = async (fileId: string) => {
+  const currentUser = await getCurrentUser();
+
+  if (!currentUser) throw new Error("User not found!");
+
+  const { databases } = await createAdminClient();
+
+  const file = await databases.getDocument(
+    appwriteConfig.databaseId,
+    appwriteConfig.filesCollection,
+    fileId,
+    [ownerSelect],
+  );
+
+  if (file.owner?.$id !== currentUser.$id) throw new Error("Not allowed!");
+
+  return file;
+};
+
+// shortcut: loads every matching file in pages of 100, add UI pagination if users get thousands of files
+const listAllFiles = async (databases: Databases, queries: string[]) => {
+  const documents: Models.DefaultDocument[] = [];
+  let page: Models.DocumentList<Models.DefaultDocument>;
+
+  do {
+    page = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollection,
+      [...queries, Query.limit(100), Query.offset(documents.length)],
+    );
+
+    documents.push(...page.documents);
+  } while (page.documents.length === 100);
+
+  return { total: documents.length, documents };
 };
 
 /**
- * Upload a file to the given path.
- * @param {UploadFileProps} props - The file to upload, the owner's ID, the account ID, and the path to revalidate.
- * @returns {Promise<Models.Document>} The uploaded file's document.
+ * A short-lived token that lets the browser upload straight to the bucket
+ * (the bucket allows `create("users")`), so the uploader can show real progress.
  */
-export const uploadFile = async ({
-  file,
-  ownerId,
-  accountId,
-  path,
-}: UploadFileProps) => {
+export const getUploadToken = async () => {
+  try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) throw new Error("User not found!");
+
+    const { users } = await createAdminClient();
+
+    const { jwt } = await users.createJWT(currentUser.accountId, undefined, 900);
+
+    return jwt;
+  } catch (error) {
+    handleError(error, "Failed to create an upload token");
+  }
+};
+
+/**
+ * Save the Files document for a file the browser already uploaded to the bucket.
+ * @param {UploadFileProps} props - The bucket file id and the path to revalidate.
+ * @returns {Promise<Models.DefaultDocument>} The uploaded file's document.
+ */
+export const uploadFile = async ({ bucketFileId, path }: UploadFileProps) => {
   const { storage, databases } = await createAdminClient();
 
   try {
-    const inputFile = InputFile.fromBuffer(file, file.name);
+    const currentUser = await getCurrentUser();
 
-    const bucketFile = await storage.createFile(
+    if (!currentUser) throw new Error("User not found!");
+
+    const bucketFile = await storage.getFile(
       appwriteConfig.bucketCollection,
-      ID.unique(),
-      inputFile,
+      bucketFileId,
     );
+
+    // Appwrite grants the uploading user these permissions, so only the uploader can save it.
+    if (
+      !bucketFile.$permissions.includes(
+        `delete("user:${currentUser.accountId}")`,
+      )
+    )
+      throw new Error("Not allowed!");
+
+    const alreadySaved = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.filesCollection,
+      [Query.equal("bucketFileId", [bucketFileId]), Query.limit(1)],
+    );
+
+    if (alreadySaved.total > 0) throw new Error("File is already saved!");
 
     const fileDocument = {
       type: getFileType(bucketFile.name).type,
@@ -42,8 +116,8 @@ export const uploadFile = async ({
       url: constructFileUrl(bucketFile.$id),
       extension: getFileType(bucketFile.name).extension,
       size: bucketFile.sizeOriginal,
-      owner: ownerId,
-      accountId,
+      owner: currentUser.$id,
+      accountId: currentUser.accountId,
       users: [],
       bucketFileId: bucketFile.$id,
     };
@@ -74,18 +148,19 @@ export const uploadFile = async ({
 
 /**
  * Create the queries to list the files accessible to the current user.
- * @param {Models.Document} currentUser - The current user document.
+ * @param {Models.DefaultDocument} currentUser - The current user document.
  * @returns {Promise<Query[]>} A promise that resolves to an array of queries.
  * @throws Will throw an error if any of the queries fail.
  */
 export const createQueries = async (
-  currentUser: Models.Document,
+  currentUser: Models.DefaultDocument,
   types: string[],
   searchText?: string,
   sort?: string,
   limit?: number,
 ) => {
   const queries = [
+    ownerSelect,
     Query.or([
       Query.equal("owner", [currentUser.$id]),
       Query.contains("users", [currentUser.email]),
@@ -108,14 +183,13 @@ export const createQueries = async (
     orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy),
   );
 
-  // Todo: Search, sort, limits
-
   return queries;
 };
 
 /**
  * Retrieve a list of files accessible to the current user.
- * @returns {Promise<Models.Document[]>} A promise that resolves to an array of file documents.
+ * Without a limit, every matching file is returned.
+ * @returns {Promise<Models.DefaultDocument[]>} A promise that resolves to an array of file documents.
  * @throws Will throw an error if the user is not found or if retrieval fails.
  */
 export const getFiles = async ({
@@ -131,13 +205,21 @@ export const getFiles = async ({
 
     if (!currentUser) throw new Error("User not found!");
 
-    const queries = createQueries(currentUser, types, searchText, sort, limit);
-
-    const files = await databases.listDocuments(
-      appwriteConfig.databaseId,
-      appwriteConfig.filesCollection,
-      await queries,
+    const queries = await createQueries(
+      currentUser,
+      types,
+      searchText,
+      sort,
+      limit,
     );
+
+    const files = limit
+      ? await databases.listDocuments(
+          appwriteConfig.databaseId,
+          appwriteConfig.filesCollection,
+          queries,
+        )
+      : await listAllFiles(databases, queries);
 
     return parseStringify(files);
   } catch (error) {
@@ -145,16 +227,22 @@ export const getFiles = async ({
   }
 };
 
-export const renameFile = async ({
-  fileId,
-  name,
-  extension,
-  path,
-}: RenameFileProps) => {
+export const renameFile = async ({ fileId, name, path }: RenameFileProps) => {
   const { databases } = await createAdminClient();
 
   try {
-    const newName = `${name}.${extension}`;
+    const file = await getOwnedFile(fileId);
+
+    const baseName = name.trim();
+
+    if (!baseName) throw new Error("File name is required!");
+
+    // The rename input starts with the full name, so only add the extension if it's missing.
+    const newName =
+      !file.extension ||
+      baseName.toLowerCase().endsWith(`.${file.extension}`)
+        ? baseName
+        : `${baseName}.${file.extension}`;
 
     const updatedFile = await databases.updateDocument(
       appwriteConfig.databaseId,
@@ -171,6 +259,7 @@ export const renameFile = async ({
   }
 };
 
+/** Replace the file's shared-with list. Callers send the full list, not just new emails. */
 export const updateFileUsers = async ({
   fileId,
   emails,
@@ -179,29 +268,31 @@ export const updateFileUsers = async ({
   const { databases } = await createAdminClient();
 
   try {
+    const validEmails = z.array(z.string().email()).parse(emails);
+
+    await getOwnedFile(fileId);
+
     const updatedFile = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollection,
       fileId,
-      { users: emails },
+      { users: [...new Set(validEmails)] },
     );
 
     revalidatePath(path);
 
     return parseStringify(updatedFile);
   } catch (error) {
-    handleError(error, "Failed to rename the file!");
+    handleError(error, "Failed to share the file!");
   }
 };
 
-export const deleteFile = async ({
-  fileId,
-  bucketFileId,
-  path,
-}: DeleteFileProps) => {
+export const deleteFile = async ({ fileId, path }: DeleteFileProps) => {
   const { databases, storage } = await createAdminClient();
 
   try {
+    const file = await getOwnedFile(fileId);
+
     const deletedDocument = await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.filesCollection,
@@ -213,7 +304,7 @@ export const deleteFile = async ({
     if (deletedDocument) {
       deletedFile = await storage.deleteFile(
         appwriteConfig.bucketCollection,
-        bucketFileId,
+        file.bucketFileId,
       );
     }
 
@@ -228,15 +319,13 @@ export const deleteFile = async ({
 
 export async function getTotalSpaceUsed() {
   try {
-    const { databases } = await createSessionClient();
+    const { databases } = await createAdminClient();
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User is not authenticated.");
 
-    const files = await databases.listDocuments(
-      appwriteConfig.databaseId,
-      appwriteConfig.filesCollection,
-      [Query.equal("owner", [currentUser.$id])],
-    );
+    const files = await listAllFiles(databases, [
+      Query.equal("owner", [currentUser.$id]),
+    ]);
 
     const totalSpace = {
       image: { size: 0, latestDate: "" },

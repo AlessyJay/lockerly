@@ -142,7 +142,7 @@ export const getFileIcon = (
     case "pdf":
       return "/icons/file-pdf.svg";
     case "doc":
-      return "/icons/file-docs.svg";
+      return "/icons/file-doc.svg";
     case "docx":
       return "/icons/file-docx.svg";
     case "csv":

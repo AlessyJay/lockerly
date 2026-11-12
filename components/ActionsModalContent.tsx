@@ -8,7 +8,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Trash } from "lucide-react";
 
-const ImageThumbnail = ({ file }: { file: Models.Document }) => {
+const ImageThumbnail = ({ file }: { file: Models.DefaultDocument }) => {
   return (
     <div className="file-details-thumbnail">
       <Thumbnail type={file.type} extension={file.extension} url={file.url} />
@@ -29,7 +29,7 @@ const DetailRow = ({ label, value }: { label: string; value: string }) => {
   );
 };
 
-export const FileDetails = ({ file }: { file: Models.Document }) => {
+export const FileDetails = ({ file }: { file: Models.DefaultDocument }) => {
   return (
     <React.Fragment>
       <ImageThumbnail file={file} />
@@ -60,7 +60,14 @@ export const ShareInput = ({
         <Input
           type="email"
           placeholder="Enter email address"
-          onChange={(e) => onInputChange(e.target.value.trim().split(","))}
+          onChange={(e) =>
+            onInputChange(
+              e.target.value
+                .split(",")
+                .map((email) => email.trim())
+                .filter(Boolean),
+            )
+          }
           className="share-input-field"
         />
 
